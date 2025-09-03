@@ -2,6 +2,7 @@ import argparse
 from tabulate import tabulate
 from app.budget import spend_by_category, generate_budgets, save_budgets, compare_to_budget
 from app.db import init_db
+from app.agent_loop import propose_actions
 
 def cmd_spend(args):
     s = spend_by_category(days=args.days)
@@ -19,6 +20,10 @@ def cmd_status(args):
     rows = [(k, b, a, d) for k, (b, a, d) in cmp.items()]
     print(tabulate(rows, headers=["Category", "Budget", "Actual", "Δ (A-B)"]))
 
+def cmd_propose(args):
+    for i, action in enumerate(propose_actions(), 1):
+        print(f"{i}. {action}")
+
 if __name__ == "__main__":
     init_db()
     p = argparse.ArgumentParser(prog="plaid-budget-agent")
@@ -32,6 +37,7 @@ if __name__ == "__main__":
     bg.add_argument("--cushion", type=float, default=0.10)
 
     st = sub.add_parser("status"); st.set_defaults(func=cmd_status)
+    pr = sub.add_parser("propose"); pr.set_defaults(func=cmd_propose)
 
     args = p.parse_args()
     args.func(args)
