@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero">
+    <h1>Connect your bank account</h1>
+    <p>Use Plaid Link (Sandbox) to securely connect and start analyzing your spending.</p>
+  </section>
+
+  <div class="grid">
+    <div class="card span-6">
+      <h3 style="margin-top:0;">Plaid Connection</h3>
+      {% if is_connected %}
+        <p class="notice"><span class="success">Connected.</span> Your sandbox account is linked. You can re-open Plaid Link to relink or add another.</p>
+        <button id="link-btn" class="btn link-btn">🔗 Re-open Plaid Link <span class="badge">Sandbox</span></button>
+      {% else %}
+        <p class="notice">No account linked yet. Click below to open Plaid Link.</p>
+        <button id="link-btn" class="btn link-btn">🔗 Connect with Plaid <span class="badge">Sandbox</span></button>
+      {% endif %}
+      <p id="link-status" class="notice" style="margin-top:10px;"></p>
+    </div>
+
+    <div class="card span-6">
+      <h3 style="margin-top:0;">What happens next?</h3>
+      <ul>
+        <li>Plaid Link returns a <em>public_token</em></li>
+        <li>We exchange it server-side for a secure <em>access_token</em></li>
+        <li>We auto-sync the last 90 days of transactions</li>
+        <li>View & filter transactions; then build budgets & suggestions</li>
+      </ul>
+      <p class="notice">All data here uses Plaid Sandbox test credentials.</p>
+    </div>
+  </div>
+
+  <script>
+    async function createLinkToken() {
+      const r = await fetch("/api/link_token");
+      const j = await r.json();
+      return j.link_token;
+    }
+
+    async function openLink() {
+      const status = document.getElementById('link-status');
+      status.textContent = "Creating link token…";
+      const linkToken = await createLinkToken();
+
+      if (!window.Plaid) {
+        await new Promise((res) => {
+          const s = document.createElement("script");
+          s.src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js";
+          s.onload = res; document.head.appendChild(s);
+        });
+      }
+
+      const handler = window.Plaid.create({
+        token: linkToken,
+        onSuccess: async (public_token, metadata) => {
+          status.textContent = "Exchanging token…";
+          const resp = await fetch("/api/exchange_public_token", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ public_token })
+          });
+          if (resp.ok) {
+            status.textContent = "✅ Linked! Redirecting…";
+            setTimeout(() => location.href = "/transactions", 600);
+          } else {
+            status.textContent = "❌ Exchange failed.";
+          }
+        },
+        onExit: () => { status.textContent = "Link closed."; }
+      });
+      handler.open();
+    }
+
+    document.getElementById("link-btn").addEventListener("click", openLink);
+  </script>
+{% endblock %}

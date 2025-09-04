@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Plaid Budget Agent</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <div class="brand">
+        <div class="logo">PB</div>
+        <span>Plaid Budget Agent</span>
+      </div>
+      <div>
+        <a href="/">Home</a>
+        <a href="/transactions">Transactions</a>
+        <a href="/budgets">Budgets</a>
+      </div>
+    </nav>
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

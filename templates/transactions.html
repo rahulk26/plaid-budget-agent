@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero">
+    <h1>Transactions</h1>
+    <p class="notice">Filter by timeframe and category. Data refreshes after each link or sync.</p>
+  </section>
+
+  <div class="card">
+    <form method="get" action="/transactions" class="filters" id="filter-form">
+      <!-- timeframe -->
+      <div class="field">
+        <label for="days">Timeframe</label>
+        <select name="days" id="days">
+          <option value="30"  {{ "selected" if days==30 else "" }}>Last 30 days</option>
+          <option value="60"  {{ "selected" if days==60 else "" }}>Last 60 days</option>
+          <option value="90"  {{ "selected" if days==90 else "" }}>Last 90 days</option>
+        </select>
+      </div>
+
+      <!-- categories as chips -->
+      <div class="field" style="flex:1">
+        <label>Categories <span class="chip-count" id="chip-count"></span></label>
+        <div class="chips" id="chips">
+          {% for c in categories %}
+            {% set is_sel = (c in categories_selected) %}
+            <label class="chip-check {{ 'selected' if is_sel else '' }}">
+              <input type="checkbox" name="category" value="{{ c }}" {{ 'checked' if is_sel else '' }}>
+              {{ c }}
+            </label>
+          {% endfor %}
+        </div>
+        <p class="notice">💡 Select multiple categories. Selecting “All” deselects others (and vice versa).</p>
+      </div>
+
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="btn" type="submit">Apply Filters</button>
+      </div>
+      <div class="field" style="margin-left:auto;">
+        <label>&nbsp;</label>
+        <a class="btn secondary" href="/transactions">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Name</th><th>Merchant</th>
+            <th>Category</th><th>Subcategory</th><th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>{{ r.date }}</td>
+              <td>{{ r.name }}</td>
+              <td>{{ r.merchant_name or "" }}</td>
+              <td><span class="chip">{{ r.category or "Other" }}</span></td>
+              <td>{{ r.subcategory or "" }}</td>
+              <td>${{ "%.2f"|format(r.amount) }} {{ r.iso_currency or "" }}</td>
+            </tr>
+          {% endfor %}
+          {% if rows|length == 0 %}
+            <tr><td colspan="6"><em class="notice">No transactions for this filter.</em></td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Chip behavior: "All" is exclusive; others deselect "All".
+    (function(){
+      const chips = document.getElementById('chips');
+      const count = document.getElementById('chip-count');
+
+      function updateChipClasses() {
+        chips.querySelectorAll('.chip-check').forEach(lbl => {
+          const input = lbl.querySelector('input[type=checkbox]');
+          lbl.classList.toggle('selected', input.checked);
+        });
+        const selected = chips.querySelectorAll('input[type=checkbox]:checked');
+        const allSel = Array.from(selected).some(i => i.value === 'All');
+        const n = allSel ? 'All' : selected.length;
+        count.textContent = n === 'All' ? '(All)' : `(${n} selected)`;
+      }
+
+      chips.addEventListener('click', (e) => {
+        const label = e.target.closest('.chip-check');
+        if (!label) return;
+        const input = label.querySelector('input[type=checkbox]');
+        input.checked = !input.checked;
+
+        const allBox = chips.querySelector('input[value="All"]');
+
+        if (input.value === 'All' && input.checked) {
+          chips.querySelectorAll('input[type=checkbox]').forEach(cb => {
+            if (cb.value !== 'All') cb.checked = false;
+          });
+        } else if (input.value !== 'All' && input.checked) {
+          if (allBox) allBox.checked = false;
+        } else {
+          const any = chips.querySelector('input[type=checkbox]:checked');
+          if (!any && allBox) allBox.checked = true;
+        }
+
+        updateChipClasses();
+      });
+
+      // Initialize on load
+      updateChipClasses();
+    })();
+  </script>
+{% endblock %}
