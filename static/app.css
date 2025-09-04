@@ -125,3 +125,46 @@ select[multiple] {
   color: var(--muted);
   padding-left: 6px;
 }
+
+/* budgets list */
+.budget-list { display: flex; flex-direction: column; gap: 14px; }
+.budget-row { padding: 10px 6px; border-bottom: 1px solid #e5e7eb; }
+.budget-row:last-child { border-bottom: 0; }
+
+.row-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 6px; }
+.cat { font-weight: 600; }
+.nums { font-size: 13px; color: var(--text); }
+.nums .muted { color: var(--muted); }
+.over { color: var(--danger); font-weight: 600; }
+.under { color: var(--success); font-weight: 600; }
+.on { color: var(--muted); font-weight: 600; }
+
+.bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #eef2f7;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #93c5fd);
+  width: 0%;
+  transition: width 0.8s ease-in-out; /* 🔥 smooth animation */
+  border-radius: 999px;
+}
+
+.bar-legend {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* suggestions */
+.suggestions { margin: 0; padding-left: 18px; }
+.suggestions li { margin: 8px 0; }

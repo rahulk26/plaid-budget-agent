@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero">
+    <h1>Budgets</h1>
+    <p class="notice">
+      Viewing <strong>actuals for the last {{ days }} days</strong>. Monthly budgets are
+      <em>scaled</em> to this window for comparison.
+    </p>
+  </section>
+
+  {% if request.args.get('synced') %}
+    <p class="notice">✅ Sync complete: {{ request.args.get('synced') }} new transactions.</p>
+  {% endif %}
+
+  <div class="grid">
+    <div class="card span-6">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <h3 style="margin:0;">Budget vs. Actual</h3>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <!-- timeframe selector -->
+          <form method="get" action="/budgets" style="display:flex; gap:8px; align-items:center; margin:0;">
+            <select name="days" style="background: var(--panel-2); border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 8px;">
+              <option value="30"  {{ "selected" if days==30 else "" }}>Last 30d</option>
+              <option value="60"  {{ "selected" if days==60 else "" }}>Last 60d</option>
+              <option value="90"  {{ "selected" if days==90 else "" }}>Last 90d</option>
+            </select>
+            <button class="btn secondary" type="submit">Apply</button>
+          </form>
+
+          <!-- sync latest -->
+          <form method="post" action="/sync" style="margin:0;">
+            <input type="hidden" name="days" value="{{ days }}">
+            <button class="btn secondary" type="submit">↻ Sync Latest</button>
+          </form>
+
+          <!-- rebuild budgets -->
+          <form method="post" action="/budgets" style="margin:0;">
+            <button class="btn" type="submit">📊 Rebuild Budgets</button>
+          </form>
+        </div>
+      </div>
+
+      {% if rows|length == 0 %}
+        <p class="notice">No budgets yet. Click <strong>Rebuild Budgets</strong> to create them from your history.</p>
+      {% else %}
+        <div class="budget-list">
+          {% for r in rows %}
+            <div class="budget-row">
+              <div class="row-head">
+                <div class="cat">{{ r.category }}</div>
+                <div class="nums">
+                  <span class="muted">Monthly Budget:</span> ${{ "%.2f"|format(r.budget) }} &nbsp;•&nbsp;
+                  <span class="muted">Actual ({{ days }}d):</span> ${{ "%.2f"|format(r.actual) }} &nbsp;•&nbsp;
+                  <span class="{{ 'over' if r.delta>0 else 'under' if r.delta<0 else 'on' }}">
+                    {{ 'Over (scaled)' if r.delta>0 else 'Under (scaled)' if r.delta<0 else 'On Track' }}
+                    (Δ {{ '+' if r.delta>0 else '' }}{{ "%.2f"|format(r.delta) }})
+                  </span>
+                </div>
+              </div>
+
+              <div class="bar">
+                <div class="bar-fill" data-width="{{ r.pct }}"></div>
+              </div>
+              <div class="bar-legend">
+                <span>{{ r.pct }}% of scaled budget</span>
+                <span>${{ "%.2f"|format(r.actual) }} vs. monthly ${{ "%.2f"|format(r.budget) }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card span-6">
+      <h3 style="margin-top:0;">Suggestions</h3>
+      {% if suggestions|length == 0 %}
+        <p class="notice">All categories are within thresholds. Keep it up!</p>
+      {% else %}
+        <ul class="suggestions">
+          {% for s in suggestions %}
+            <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+  document.querySelectorAll('.bar-fill').forEach((el, i) => {
+    const pct = el.getAttribute('data-width');
+    setTimeout(() => {
+      el.style.width = pct + '%';
+    }, i * 150); // stagger each by 150ms
+  });
+</script>
+
+{% endblock %}
