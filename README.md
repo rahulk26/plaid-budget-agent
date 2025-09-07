@@ -1,7 +1,12 @@
 # Plaid Budget Agent
 
-A personal finance web app built with **Python, Flask, and Plaid API**.  
-Connect a sandbox bank account, sync transactions, filter by timeframe and category, and view budgets vs. actuals with clean visual dashboards.
+💸 Plaid Budget Agent is your personal finance sidekick — a lightweight web app that helps you take control of your spending.
+
+Connect a sandbox bank account securely through Plaid, instantly sync transactions, and explore them with smart filters by timeframe (30/60/90 days) and category.
+
+📊 The app automatically builds personalized budgets from your past spending habits, compares them against your actual expenses, and visualizes your progress with clean animated charts.
+
+🔁 With one click, you can refresh your data, rebuild budgets, and see suggestions to keep your finances on track — all in a sleek, modern interface that’s easy to use and fun to explore.
 
 ---
 
