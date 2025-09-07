@@ -1,6 +1,6 @@
-# Plaid Budget Agent
+# Budgie
 
-💸 Plaid Budget Agent is your personal finance sidekick — a lightweight web app that helps you take control of your spending.
+💸 Budgie is your personal finance sidekick — a way to help you take control of your spending.
 
 Connect a sandbox bank account securely through Plaid, instantly sync transactions, and explore them with smart filters by timeframe (30/60/90 days) and category.
 
